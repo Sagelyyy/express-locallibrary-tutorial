@@ -144,11 +144,40 @@ exports.bookinstance_delete_post = (req, res, next) => {
 };
 
 // Display BookInstance update form on GET.
-exports.bookinstance_update_get = (req, res) => {
-  res.send("NOT IMPLEMENTED: BookInstance update GET");
+exports.bookinstance_update_get = (req, res, next) => {
+  async.parallel({
+    books(callback) {
+      Book.find({}, "title")
+        .exec(callback)
+    },
+    bookinstance(callback) {
+      BookInstance.findById(req.params.id)
+        .exec(callback)
+    },
+  },
+    (err, results) => {
+      console.log(results.books)
+      if(err){
+        return next(err)
+      }
+      if (results.books == null) {
+        // No results.
+        const err = new Error("Book not found");
+        err.status = 404;
+        return next(err);
+      }
+
+      res.render("bookinstance_form", {
+        title: "Update BookInstance",
+        book_list: results.books,
+        bookinstance: results.bookinstance,
+        book_status: ["Available", "Maintenance", "Loaned", "Reserved"]
+      });
+    }
+  )
 };
 
 // Handle bookinstance update on POST.
-exports.bookinstance_update_post = (req, res) => {
+exports.bookinstance_update_post = (req, res, next) => {
   res.send("NOT IMPLEMENTED: BookInstance update POST");
 };
