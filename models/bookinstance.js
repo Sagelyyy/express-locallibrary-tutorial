@@ -24,7 +24,12 @@ BookInstanceSchema.virtual("url").get(function () {
 
 // Format the dates to make the look pretty
 BookInstanceSchema.virtual("due_back_formatted").get(function () {
-  return DateTime.fromJSDate(this.due_back).toLocaleString(DateTime.DATE_MED);
+  return DateTime.fromJSDate(this.due_back, {zone: 'utc'}).toLocaleString(DateTime.DATE_MED);
+});
+
+// Format the date to ISO format
+BookInstanceSchema.virtual("due_back_iso").get(function () {
+  return DateTime.fromJSDate(this.due_back, {zone: 'utc'}).toISO().substring(0, 10).toLocaleString(DateTime.DATE_MED);
 });
 
 
