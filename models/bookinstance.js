@@ -29,7 +29,11 @@ BookInstanceSchema.virtual("due_back_formatted").get(function () {
 
 // Format the date to ISO format
 BookInstanceSchema.virtual("due_back_iso").get(function () {
-  return DateTime.fromJSDate(this.due_back, {zone: 'utc'}).toISO().substring(0, 10).toLocaleString(DateTime.DATE_MED);
+  if(this.due_back){
+    return DateTime.fromJSDate(this.due_back, {zone: 'utc'}).toISO().substring(0, 10).toLocaleString(DateTime.DATE_MED);
+  }else{
+    return ''
+  }
 });
 
 

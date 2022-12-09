@@ -6,20 +6,20 @@ const { body, validationResult } = require("express-validator");
 
 // Display list of all Authors.
 exports.author_list = function (req, res, next) {
-    Author.find()
-      .sort([["family_name", "ascending"]])
-      .exec(function (err, list_authors) {
-        if (err) {
-          return next(err);
-        }
-        //Successful, so render
-        res.render("author_list", {
-          title: "Author List",
-          author_list: list_authors,
-        });
+  Author.find()
+    .sort([["family_name", "ascending"]])
+    .exec(function (err, list_authors) {
+      if (err) {
+        return next(err);
+      }
+      //Successful, so render
+      res.render("author_list", {
+        title: "Author List",
+        author_list: list_authors,
       });
-  };
-  
+    });
+};
+
 
 // Display detail page for a specific Author.
 exports.author_detail = (req, res, next) => {
@@ -189,11 +189,74 @@ exports.author_delete_post = (req, res, next) => {
 
 // Display Author update form on GET.
 exports.author_update_get = (req, res) => {
-    res.send("NOT IMPLEMENTED: Author update GET")
+  Author.findById(req.params.id)
+    .exec((err, author) => {
+      res.render("author_form", {
+        title: "Update Author",
+        author
+      })
+    })
 };
 
 // Handle Author update POST.
-exports.author_update_post = (req, res) => {
-    res.send("NOT IMPLEMENTED: Author update POST")
-};
+exports.author_update_post = [
+  // Validate and sanitize
+  body("first_name", "First name must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("family_name", "Last name must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("date_of_birth", "Date must not be empty.")
+    .isDate()
+    .isLength({ min: 1 })
+    .escape(),
+  body("date_of_death", "Date must valid.")
+    .optional({checkFalsy: true})
+    .isISO8601()
+    .escape(),
+
+  (req, res, next) => {
+    // Extract validation errors
+    const errors = validationResult(req);
+
+    // Create author with escaped/trimmed data and old id.
+    const author = new Author({
+      first_name: req.body.first_name,
+      family_name: req.body.family_name,
+      date_of_birth: req.body.date_of_birth,
+      date_of_death: req.body.date_of_death,
+      _id: req.params.id
+    })
+
+    if (!errors.isEmpty()) {
+      Author.findById(req.params.id)
+        .exec((err, author) => {
+          if (err) {
+            return next(err)
+          }
+          if (author == null) {
+            const err = new Error("Author not found")
+            err.status = 404
+            return next(err)
+          }
+          res.render("author_form", {
+            title: "Update Author",
+            author,
+            errors: errors.array()
+          })
+        })
+      return
+    }
+    Author.findByIdAndUpdate(req.params.id, author, {}, (err, theauthor) => {
+      if (err) {
+        return next(err)
+      }
+      res.redirect(theauthor.url)
+    })
+  }
+
+];
 

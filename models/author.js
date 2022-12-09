@@ -32,12 +32,25 @@ AuthorSchema.virtual("url").get(function () {
 
 // Make dates looks pretty
 AuthorSchema.virtual("birth_date_formatted").get(function(){
-  return this.date_of_birth ? DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED) : '';
+  return this.date_of_birth ? DateTime.fromJSDate(this.date_of_birth, {zone: 'utc'}).toLocaleString(DateTime.DATE_MED) : '';
 })
 
 AuthorSchema.virtual("death_date_formatted").get(function(){
-  return this.date_of_death ? DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED) : '';
+  return this.date_of_death ? DateTime.fromJSDate(this.date_of_death, {zone: 'utc'}).toLocaleString(DateTime.DATE_MED) : '';
 })
+
+// Format the date to ISO format
+AuthorSchema.virtual("birth_iso").get(function () {
+  return DateTime.fromJSDate(this.date_of_birth, {zone: 'utc'}).toISO().substring(0, 10).toLocaleString(DateTime.DATE_MED);
+});
+
+AuthorSchema.virtual("death_iso").get(function () {
+  if(this.date_of_death){
+    return DateTime.fromJSDate(this.date_of_death, {zone: 'utc'}).toISO().substring(0, 10).toLocaleString(DateTime.DATE_MED);
+  }else{
+    return('')
+  }
+});
 
 // Export model
 module.exports = mongoose.model("Author", AuthorSchema);

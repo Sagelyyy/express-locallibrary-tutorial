@@ -121,22 +121,22 @@ exports.bookinstance_create_post = [
 // Display BookInstance delete form on GET.
 exports.bookinstance_delete_get = (req, res, next) => {
   BookInstance.findById(req.params.id)
-  .populate("book")
-  .exec((err, book_instance) => {
-    if (err){
-      return next(err)
-    }
-    res.render("bookinstance_delete", {
-      title: "Delete Copy",
-      book_instance: book_instance
+    .populate("book")
+    .exec((err, book_instance) => {
+      if (err) {
+        return next(err)
+      }
+      res.render("bookinstance_delete", {
+        title: "Delete Copy",
+        book_instance: book_instance
+      })
     })
-  })
 };
 
 // Handle BookInstance delete on POST.
 exports.bookinstance_delete_post = (req, res, next) => {
   BookInstance.findByIdAndRemove(req.params.id, (err) => {
-    if(err){
+    if (err) {
       return next(err)
     }
     res.redirect("/catalog/bookinstances")
@@ -157,7 +157,7 @@ exports.bookinstance_update_get = (req, res, next) => {
     },
   },
     (err, results) => {
-      if(err){
+      if (err) {
         return next(err)
       }
       if (results.books == null) {
@@ -189,7 +189,7 @@ exports.bookinstance_update_post = [
   body("due_back", "Invalid date")
     .optional({ checkFalsy: true })
     .isISO8601()
-    .toDate(),
+    .escape(),
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -219,8 +219,7 @@ exports.bookinstance_update_post = [
         },
       },
         (err, results) => {
-          console.log(results.bookinstance)
-          if(err){
+          if (err) {
             return next(err)
           }
           if (results.books == null) {
@@ -229,7 +228,7 @@ exports.bookinstance_update_post = [
             err.status = 404;
             return next(err);
           }
-    
+
           res.render("bookinstance_form", {
             title: "Update BookInstance",
             book_list: results.books,
@@ -239,7 +238,7 @@ exports.bookinstance_update_post = [
           });
         }
       )
-      return next(err);
+      return
     }
 
     // Data from form is valid.
